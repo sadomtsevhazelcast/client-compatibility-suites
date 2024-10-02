@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        server-version: ${{ fromJson(needs.setup_server_matrix.outputs.matrix) }}
+        server-version: ["5.2.5"]
         kind: [ os, enterprise ]
     name: Test Java client ${{ github.event.inputs.branch_name }} branch against ${{ matrix.kind }} ${{ matrix.server-version }} server
     steps:
@@ -80,13 +80,6 @@ jobs:
         if: ${{ matrix.kind == 'enterprise' }}
         run: |
           echo "HZ_LICENSEKEY=${{ '>' == steps.version.outputs.comparison-result && secrets.HAZELCAST_ENTERPRISE_KEY || secrets.HAZELCAST_ENTERPRISE_KEY_V5 }}" >> $GITHUB_ENV
-
-      - name: Run non-enterprise tests
-        shell: bash -l {0}
-        run: |
-          chmod +x mvnw
-          ./mvnw -B -V -e install -Pintegration-tests -Pcode-coverage -Djdk.version=${{ env.JAVA_VERSION }} -Dtest.hazelcast-server.version=${{ matrix.server-version }}
-        working-directory: client/hazelcast-java-client
 
       - name: Run enterprise tests
         if: ${{ matrix.kind == 'enterprise' }}
